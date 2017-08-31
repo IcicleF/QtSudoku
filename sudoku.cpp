@@ -82,7 +82,8 @@ vector<bool> Sudoku::removeBlocks(int& blanks)
     memset(order, 0, sizeof(order));
     for (int i = 0; i < 9 * 9; ++i)
         order[i] = i;
-    std::random_shuffle(order, order + 9 * 9);
+    for (int i = 0; i < 9 * 9 - 1; ++i)
+        std::swap(order[i], order[i + rand() % (80 - i)]);
 
     for (int i = 0; i < 9; ++i)
         for (int j = 0; j < 9; ++j)
@@ -114,7 +115,7 @@ bool Sudoku::check(int pos)
 void Sudoku::shuffle()
 {
     //shuffle number
-    std::default_random_engine generator;
+    std::default_random_engine generator(time(0));
     std::uniform_int_distribution<int> dist_num(1, 9);
     std::uniform_int_distribution<int> dist_row(0, 2);
 

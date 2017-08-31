@@ -9,6 +9,7 @@
 #include <QCloseEvent>
 
 #include "sudoku.h"
+#include "CrossButton.h"
 
 namespace Ui {
 class MainWindow;
@@ -27,7 +28,7 @@ protected:
 
 private:
     QCheckBox      *sel[10], *eraser;
-    QPushButton    *grid[10][10];
+    CrossButton    *grid[10][10];
     QTimer         *timer;
     QSignalMapper  *mapper;
     Ui::MainWindow *ui;
@@ -51,7 +52,7 @@ private:
 
         Operation(int x = 0, int y = 0, int val = 0, bool isFillin = true):
             x(x), y(y), val(val), isFillin(isFillin) { }
-    }op[9 * 9 * 9];
+    }op[9 * 9 * 99];
     int top, top_origin;
 
     //------------------------------------------
@@ -59,6 +60,7 @@ private:
     void Paint();
     void Clear();
     void NewGame(int);
+    void SaveGame(bool);
     bool CheckGame();
     void PrepareGame();
 
@@ -89,6 +91,8 @@ public slots:
     void RetryGame();
     void QuitGame();
     void StartPauseGame();
+    void SaveGameSlot();
+    void ResumeGame();
 
     void Undo();
     void Redo();

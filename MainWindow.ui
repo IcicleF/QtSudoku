@@ -220,6 +220,9 @@
     <addaction name="menuNew"/>
     <addaction name="actionLoad"/>
     <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionResume"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuCheat">
@@ -302,12 +305,22 @@
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>Load...</string>
+    <string>Load Game...</string>
    </property>
   </action>
   <action name="actionRetry">
    <property name="text">
     <string>Retry</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save Game</string>
+   </property>
+  </action>
+  <action name="actionResume">
+   <property name="text">
+    <string>Resume Game</string>
    </property>
   </action>
  </widget>

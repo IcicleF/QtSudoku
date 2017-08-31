@@ -15,10 +15,12 @@ TEMPLATE = app
 SOURCES += main.cpp\
         MainWindow.cpp \
     sudoku.cpp \
-    force_solver.cpp
+    force_solver.cpp \
+    CrossButton.cpp
 
 HEADERS  += MainWindow.h \
     sudoku.h \
-    force_solver.h
+    force_solver.h \
+    CrossButton.h
 
 FORMS    += MainWindow.ui
