@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDebug>
 
 inline QString Prefix(int x)
 {
@@ -105,6 +106,47 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (playing)
         this->SaveGame(false);
     event->accept();
+}
+
+void MainWindow::ModifyRequest(int x, int y, int k)
+{
+    int value = grid[x][y]->text().toInt();
+    if (value != k)
+    {
+        op[top++] = Operation(x, y, value, k);
+        grid[x][y]->setText(k ? QString::number(k) : "");
+        top_origin = top;
+        ui->actionRedo->setEnabled(false);
+        ui->actionUndo->setEnabled(true);
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *ev)
+{
+    if (!Waiting)
+    {
+        QWidget::keyPressEvent(ev);
+        return;
+    }
+    switch (ev->key())
+    {
+    case Qt::Key_1: ModifyRequest(wait_x, wait_y, 1); break;
+    case Qt::Key_2: ModifyRequest(wait_x, wait_y, 2); break;
+    case Qt::Key_3: ModifyRequest(wait_x, wait_y, 3); break;
+    case Qt::Key_4: ModifyRequest(wait_x, wait_y, 4); break;
+    case Qt::Key_5: ModifyRequest(wait_x, wait_y, 5); break;
+    case Qt::Key_6: ModifyRequest(wait_x, wait_y, 6); break;
+    case Qt::Key_7: ModifyRequest(wait_x, wait_y, 7); break;
+    case Qt::Key_8: ModifyRequest(wait_x, wait_y, 8); break;
+    case Qt::Key_9: ModifyRequest(wait_x, wait_y, 9); break;
+    case Qt::Key_Delete: case Qt::Key_Backspace:
+        ModifyRequest(wait_x, wait_y, 0); break;
+    default:
+        QWidget::keyPressEvent(ev);
+    }
+    Waiting = false;
+    wait_x = wait_y = -1;
+    this->Paint();
 }
 
 void MainWindow::RetryGame()
@@ -218,11 +260,8 @@ void MainWindow::ResumeGame()
         }
     }
     fin >> top >> top_origin;
-    for (int i = 0, tmp; i < top_origin; ++i)
-    {
-        fin >> op[i].x >> op[i].y >> op[i].val >> tmp;
-        op[i].isFillin = (tmp == 1);
-    }
+    for (int i = 0; i < top_origin; ++i)
+        fin >> op[i].x >> op[i].y >> op[i].from >> op[i].to;
     fin >> Seconds;
     file.close();
 
@@ -292,7 +331,7 @@ void MainWindow::SaveGame(bool showMsg)
     fout << top << " " << top_origin << endl;
     for (int i = 0; i < top_origin; ++i)
         fout << op[i].x << " " << op[i].y << " "
-             << op[i].val << " " << (op[i].isFillin ? 1 : 0) << endl;
+             << op[i].from << " " << op[i].to << endl;
     fout << Seconds << endl;
     file.close();
 
@@ -307,28 +346,22 @@ void MainWindow::SaveGameSlot() { this->SaveGame(true); }
 void MainWindow::Undo()
 {
     --top;
-    if (op[top].isFillin)
-        grid[op[top].x][op[top].y]->setText("");
-    else
-        grid[op[top].x][op[top].y]->setText(QString::number(op[top].val));
+    int k = op[top].from;
+    grid[op[top].x][op[top].y]->setText(k ? QString::number(k) : "");
     this->Paint();
 
     ui->actionRedo->setEnabled(true);
-    if (!top)
-        ui->actionUndo->setEnabled(false);
+    ui->actionUndo->setEnabled(top > 0);
 }
 void MainWindow::Redo()
 {
-    if (op[top].isFillin)
-        grid[op[top].x][op[top].y]->setText(QString::number(op[top].val));
-    else
-        grid[op[top].x][op[top].y]->setText("");
+    int k = op[top].to;
+    grid[op[top].x][op[top].y]->setText(k ? QString::number(k) : "");
+    ++top;
     this->Paint();
 
-    ++top;
     ui->actionUndo->setEnabled(true);
-    if (top == top_origin)
-        ui->actionRedo->setEnabled(false);
+    ui->actionRedo->setEnabled(top < top_origin);
 }
 
 bool MainWindow::CheckGame()
@@ -449,15 +482,10 @@ void MainWindow::React(int num)
         if (Waiting)
         {
             Waiting = false;
-            if (num != -999)
+            if (num != -999 && num != grid[wait_x][wait_y]->text().toInt())
             {
                 sel[-num]->setChecked(false);
-                grid[wait_x][wait_y]->setText(QString::number(-num));
-
-                op[top++] = Operation(wait_x, wait_y, -num);
-                top_origin = top;
-                ui->actionRedo->setEnabled(false);
-                ui->actionUndo->setEnabled(true);
+                this->ModifyRequest(wait_x, wait_y, -num);
             }
             wait_x = wait_y = -1;
             SelectedNumber = 0;
@@ -539,18 +567,10 @@ void MainWindow::React(int num)
         }
 
         if (checkBoxStatus != 999 && checkBoxStatus != grid[x][y]->text().toInt())
-        {
-            op[top++] = Operation(x, y, checkBoxStatus);
-            grid[x][y]->setText(QString::number(checkBoxStatus));
-        }
+            ModifyRequest(x, y, checkBoxStatus);
         else if ((checkBoxStatus == 999 && grid[x][y]->text().toInt()) || (checkBoxStatus && checkBoxStatus == grid[x][y]->text().toInt()))
-        {
-            op[top++] = Operation(x, y, grid[x][y]->text().toInt(), false);
-            grid[x][y]->setText("");
-        }
+            ModifyRequest(x, y, 0);
         top_origin = top;
-        ui->actionRedo->setEnabled(false);
-        ui->actionUndo->setEnabled(top > 0);
     }
     this->Paint();
 }

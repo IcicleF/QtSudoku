@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     sudoku.cpp \
     force_solver.cpp \
-    CrossButton.cpp
+    CrossButton.cpp \
+    KeyboardFilter.cpp
 
 HEADERS  += MainWindow.h \
     sudoku.h \
     force_solver.h \
-    CrossButton.h
+    CrossButton.h \
+    KeyboardFilter.h
 
 FORMS    += MainWindow.ui

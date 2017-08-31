@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QTimer>
 #include <QCloseEvent>
+#include <QKeyEvent>
 
 #include "sudoku.h"
 #include "CrossButton.h"
@@ -25,6 +26,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *);
+    void keyPressEvent(QKeyEvent *ev);
 
 private:
     QCheckBox      *sel[10], *eraser;
@@ -47,11 +49,9 @@ private:
 
     struct Operation
     {
-        int x, y, val;
-        bool isFillin;
-
-        Operation(int x = 0, int y = 0, int val = 0, bool isFillin = true):
-            x(x), y(y), val(val), isFillin(isFillin) { }
+        int x, y, from, to;
+        Operation(int x = 0, int y = 0, int from = 0, int to = 0):
+            x(x), y(y), from(from), to(to) { }
     }op[9 * 9 * 99];
     int top, top_origin;
 
@@ -63,6 +63,8 @@ private:
     void SaveGame(bool);
     bool CheckGame();
     void PrepareGame();
+
+    void ModifyRequest(int, int, int);
 
     //------------------------------------------
 
